@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const passport = require("server/passport");
+const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const { SECRET  } = require("../config");
 
+const { User } = require("../schema/Users");
+
 const validateLoginInput = require("../validation/login");
+const validateRegisterInput = require("../validation/register");
 
 router.post("/login", (req, res) => {
     const {errors, isValid} = validateLoginInput(req.body);
@@ -34,3 +38,35 @@ router.post("/login", (req, res) => {
         });
     })(req, res);
 });
+
+
+
+router.post("/register", (req, res) => {
+    const {errors, isValid} = validateRegisterInput(req.body);
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+    User.findOne({email: req.body.email}).then(user => {
+        if (user) {
+            return res.status(400).json({email: "Email already exists"});
+        }
+        const newUser = new User({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password,
+            tier: req.body.tier,
+            type: req.body.type
+        });
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(newUser.password, salt, (err, hash) => {
+                if (err) throw err;
+                newUser.password = hash;
+                newUser
+                    .save()
+                    .then(user => res.status(200).json(user))
+                    .catch(err => res.status(500).json(err));
+            });
+        });
+    });
+});
+

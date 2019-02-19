@@ -2,7 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const logger = require("morgan");
 const bodyParser = require("body-parser");
+const passport = require("passport");
 const {MONGODB_HOST, PORT} = require("./config");
+
+const authRouter = require("./routes/user");
+const userRouter = require("./routes/user");
+
 
 const app = express();
 app.use(
@@ -12,6 +17,7 @@ app.use(
 );
 app.use(bodyParser.json());
 app.use(logger('dev'));
+app.use(passport.initialize());
 mongoose
     .connect(
         MONGODB_HOST,
@@ -19,4 +25,8 @@ mongoose
     )
     .then(() => console.log("MongoDB successfully connected"))
     .catch(err => console.log(err));
+
+app.use('/auth', authRouter);
+app.use('/user', passport.authenticate('jwt', {session:false}), userRouter);
+
 app.listen(PORT, () => console.log(`Server up and running on port ${port} !`));
