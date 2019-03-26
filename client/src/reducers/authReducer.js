@@ -21,13 +21,13 @@ const reducer = (state = initialState, action) => {
         case "LOGIN_REJECTED":
             return {...state, fetching: false, fetched: true, authenticated: false, error: action.payload};
         case "REGISTER":
-            return {...state, fetching: true, fetched: false, authenticated: false};
+            return {...state, fetching: true, fetched: false};
         case "REGISTER_RESOLVED":
-            return {...state, fetching: false, fetched: true, authenticated: true, user: action.payload};
+            return {...state, fetching: false, fetched: true};
         case "REGISTER_REJECTED":
-            return {...state, fetching: false, fetched: true, authenticated: false, error: action.payload};
+            return {...state, fetching: false, fetched: true, error: action.payload};
         case "LOGOUT":
-            return {...state, authenticated: false, user: false};
+            return {...state, authenticated: false, user: {}};
         default:
             return {...state};
     }

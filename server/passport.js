@@ -1,4 +1,4 @@
-const passport = require('server/passport');
+const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const {ExtractJwt, Strategy: JWTStrategy} = require('passport-jwt');
 const {Strategy: LocalStrategy} = require('passport-local');
@@ -10,25 +10,22 @@ const { User } = require('./schema/Users');
 passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password',
-    passReqtoCallback: true
-}, async (req, email, password, callback) => {
-    try {
-        let user = await User.findOne({email, type: req.body.type});
-        if(Object.keys(user).length === 0){
+    passReqToCallback: true
+}, (req, email, password, callback) => {
+    User.findOne({email, type: req.body.type}, (err, user) => {
+        if(user === null){
             return callback(null, false);
         }
         else {
-            const authenticated = await bcrypt.compare(password, user.password);
-            if(authenticated){
+            bcrypt.compare(password, user.password, (err, authenticated) => {
+                if(!authenticated){
+                    return callback(null, authenticated);
+                }
                 delete user.password;
-                callback(null, user);
-            } else {
-                return callback(null, authenticated);
-            }
+                return callback(null, user);
+            });
         }
-    } catch(e){
-        return callback(e, false);
-    }
+    });
 }));
 
 passport.use(new JWTStrategy({

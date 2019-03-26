@@ -10,7 +10,7 @@ const { User } = require("../schema/Users");
 const validateLoginInput = require("../validation/login");
 const validateRegisterInput = require("../validation/register");
 
-router.post("/login", (req, res) => {
+router.post("/login", (req, res, next) => {
     const {errors, isValid} = validateLoginInput(req.body);
     if (!isValid) {
         return res.status(400).json(errors);
@@ -26,17 +26,17 @@ router.post("/login", (req, res) => {
             if(err){
                 return res.status(500).json(err);
             }
-            jwt.sign({_id: user._id, type: user.type}, SECRET, {
+            jwt.sign({_id: user._id}, SECRET, {
                     expiresIn: 31556926 // 1 year in seconds
                 },
                 (err, token) => {
                     return res.status(200).json({
                         success: true,
-                        token: "Bearer " + token
+                        token: "bearer " + token
                     });
                 });
         });
-    })(req, res);
+    })(req, res, next);
 });
 
 
@@ -55,7 +55,9 @@ router.post("/register", (req, res) => {
             email: req.body.email,
             password: req.body.password,
             tier: req.body.tier,
-            type: req.body.type
+            type: req.body.type,
+            firstname: req.body.firstname,
+            surname: req.body.surname
         });
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -63,10 +65,13 @@ router.post("/register", (req, res) => {
                 newUser.password = hash;
                 newUser
                     .save()
-                    .then(user => res.status(200).json(user))
-                    .catch(err => res.status(500).json(err));
+                    .then(user => {
+                        delete user.password;
+                        res.status(200).json(user);
+                    }).catch(err => res.status(500).json(err));
             });
         });
     });
 });
 
+module.exports = router;

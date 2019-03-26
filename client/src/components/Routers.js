@@ -1,10 +1,20 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
-
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import LoginPage from './LoginPage';
+import {readToken} from "../actions/authActions";
+import RegisterPage from "./RegisterPage";
+import HomePage from './HomePage';
+
+import EntrepreneurRouter from './entrepreneur/EntrepreneurRouter';
+import {readBusinesses} from "../actions/businessActions";
+import AdvisorRouter from "./advisor/AdvisorRouter";
+import InvestorRouter from "./investor/InvestorRouter";
 
 class Routers extends React.Component{
+    componentDidMount(){
+        this.props.dispatch(readToken());
+    }
     render(){
         const { auth } = this.props;
         if(auth.fetching){
@@ -15,19 +25,19 @@ class Routers extends React.Component{
                 case "ENTREPRENEUR":
                     return (
                       <BrowserRouter>
-                          {/*<EntrepreneurRouter/>*/}
+                          <EntrepreneurRouter />
                       </BrowserRouter>
                     );
                 case "ADVISOR":
                     return (
                         <BrowserRouter>
-                            {/* <AdvisorRouter/>*/}
+                            <AdvisorRouter/>
                         </BrowserRouter>
                     );
                 case "INVESTOR":
                     return (
                         <BrowserRouter>
-                            {/*<InvestorRouter/> */}
+                            <InvestorRouter/>
                         </BrowserRouter>
                     );
             }
@@ -35,7 +45,9 @@ class Routers extends React.Component{
         else if(auth.fetched){
             return <BrowserRouter>
                 <Switch>
-                    <Route component={LoginPage}/>
+                    <Route path="/" exact component={HomePage} />
+                    <Route path="/login" exact component={LoginPage}/>
+                    <Route path="/register" exact component={RegisterPage}/>
                 </Switch>
             </BrowserRouter>
         }
