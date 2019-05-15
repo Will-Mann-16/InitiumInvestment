@@ -25,6 +25,7 @@ export const Navbar = styled.nav`
     justify-content: space-between;
         	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.46);
         	height: 60px;
+    padding: 0 10px;
 `;
 export const Flex = styled.div`
     display: flex;

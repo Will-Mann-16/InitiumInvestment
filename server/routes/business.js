@@ -10,17 +10,8 @@ router.get("/", (req, res) => {
               res.status(err ? 500 : 200).json(err ? err : docs);
            });
            break;
-       case "ADVISOR":
-           Business.find({}).exec(async (err, docs) => {
-               docs = await Promise.all(docs.map(async (doc) => {
-                   const owners = await User.find({_id:{ $in: doc.owners}}).select('-password').exec();
-                   return {...doc._doc, owners};
-               }));
-               res.status(err ? 500 : 200).json(err ? err : docs);
-           });
-           break;
        case "INVESTOR":
-           Business.find({approved: true}).exec(async (err, docs) => {
+           Business.find({}).exec(async (err, docs) => {
                docs = await Promise.all(docs.map(async (doc) => {
                    const owners = await User.find({_id:{ $in: doc.owners}}).select('-password').exec();
                    return {...doc._doc, owners};
@@ -58,17 +49,6 @@ router.post("/:id", (req, res) => {
         res.status(403).json({message: 'Incorrect User Access'})
     }
 });
-
-router.post("/:id/approve", (req, res) => {
-    if(req.user.type === "ADVISOR"){
-        Business.findByIdAndUpdate(req.params.id, {...req.body}, {new: true},(err, doc) => {
-            res.status(err ? 500 : 200).json(err ? err : doc);
-        });
-    } else{
-        res.status(403).json({message: 'Incorrect User Access'})
-    }
-});
-
 router.delete("/:id", (req, res) => {
     if(req.user.type === "ENTREPRENEUR"){
         Business.count({_id: req.params.id, owners: req.user._id}, (err, count) => {

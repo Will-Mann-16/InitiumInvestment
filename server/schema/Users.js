@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const TYPES = ['ENTREPRENEUR', 'ADVISOR', 'INVESTOR'];
+const TYPES = ['ENTREPRENEUR', 'INVESTOR'];
 const TIERS = ['BRONZE', 'SILVER', 'GOLD'];
 
 const UserSchema = new mongoose.Schema({
@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
     password: String,
     firstname: String,
     surname: String,
+    bio: String,
     type: {
       type: String,
       enum: [...TYPES],
